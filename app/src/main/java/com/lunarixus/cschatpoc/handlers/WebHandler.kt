@@ -1,6 +1,5 @@
 package com.lunarixus.cschatpoc.handlers
 
-import com.lunarixus.cschatpoc.serverUrl
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import java.io.BufferedReader
@@ -29,6 +28,7 @@ class WebHandler {
     fun sendMessage(query: String, callback: (String, String) -> Unit, onComplete: () -> Unit) {
         val json = """{"query": "$query"}""".trimIndent()
         val requestBody = RequestBody.create("application/json".toMediaType(), json)
+        val serverUrl = SharedPreferenceHandler.getString("server_url", "http://0.0.0.0:5000")
 
         val request = Request.Builder()
             .url("$serverUrl/chat")
@@ -121,6 +121,7 @@ class WebHandler {
      * @param onResult A callback function that returns `true` if the server responds with "online", `false` otherwise.
      */
     fun testConnection(onResult: (Boolean) -> Unit) {
+        val serverUrl = SharedPreferenceHandler.getString("server_url", "http://0.0.0.0:5000")
         val request = Request.Builder()
             .url("$serverUrl/health")
             .get()

@@ -49,16 +49,19 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.lunarixus.cschatpoc.handlers.SharedPreferenceHandler
 import com.lunarixus.cschatpoc.handlers.WebHandler
 import com.lunarixus.cschatpoc.ui.theme.CSChatPoCTheme
 import dev.jeziellago.compose.markdowntext.MarkdownText
-
-var serverUrl = "http://0.0.0.0:5000"
 
 // MainActivity Class
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Pass the application context to SharedPreferenceHandler
+        SharedPreferenceHandler.init(applicationContext)
+
         setContent {
             CSChatPoCTheme {
                 ChatScreen()
@@ -81,7 +84,7 @@ fun ChatScreen() {
     var showDialog by remember { mutableStateOf(false) }
     var connectionAvailable by remember { mutableStateOf(true) }
     var showSettings by remember { mutableStateOf(false) }
-    var serverUrlInput by remember { mutableStateOf(serverUrl) }
+    var serverUrlInput by remember { mutableStateOf(SharedPreferenceHandler.getString("server_url", "http://0.0.0.0:5000")) }
 
     // Check connection once on start
     LaunchedEffect(Unit) {
@@ -153,7 +156,7 @@ fun ChatScreen() {
                             }
 
                             // Update global URL variable
-                            serverUrl = formattedUrl
+                            SharedPreferenceHandler.putString("server_url", formattedUrl)
                             serverUrlInput = formattedUrl
 
                             // Test server connection again
