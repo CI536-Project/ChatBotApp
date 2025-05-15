@@ -17,7 +17,7 @@ class WebHandler {
         .writeTimeout(60, TimeUnit.SECONDS)
         .build()
 
-    private val serverUrl = "http://190.10.118.54:5000/chat"
+    private val serverUrl = "http://190.10.118.54:5000" // TODO: Don't hardcode this
 
     /**
      * Sends a message to the python server.
@@ -32,7 +32,7 @@ class WebHandler {
         val requestBody = RequestBody.create("application/json".toMediaType(), json)
 
         val request = Request.Builder()
-            .url(serverUrl)
+            .url("$serverUrl/chat")
             .post(requestBody)
             .build()
 
@@ -111,6 +111,31 @@ class WebHandler {
                         callback("Error: Empty response", "")
                     }
                     onComplete()
+                }
+            }
+        })
+    }
+
+    /**
+     * Tests the connection to the server by hitting the /health endpoint.
+     *
+     * @param onResult A callback function that returns `true` if the server responds with "online", `false` otherwise.
+     */
+    fun testConnection(onResult: (Boolean) -> Unit) {
+        val request = Request.Builder()
+            .url("$serverUrl/health")
+            .get()
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                onResult(false)
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                response.use {
+                    val body = response.body?.string()?.trim()
+                    onResult(response.isSuccessful && body == "online")
                 }
             }
         })
