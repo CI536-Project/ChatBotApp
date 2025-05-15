@@ -1,5 +1,6 @@
 package com.lunarixus.cschatpoc.handlers
 
+import com.lunarixus.cschatpoc.serverUrl
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import java.io.BufferedReader
@@ -16,8 +17,6 @@ class WebHandler {
         .readTimeout(60, TimeUnit.SECONDS)
         .writeTimeout(60, TimeUnit.SECONDS)
         .build()
-
-    private val serverUrl = "http://190.10.118.54:5000" // TODO: Don't hardcode this
 
     /**
      * Sends a message to the python server.

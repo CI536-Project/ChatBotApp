@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -34,6 +35,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -50,6 +52,8 @@ import androidx.compose.ui.unit.sp
 import com.lunarixus.cschatpoc.handlers.WebHandler
 import com.lunarixus.cschatpoc.ui.theme.CSChatPoCTheme
 import dev.jeziellago.compose.markdowntext.MarkdownText
+
+var serverUrl = "http://0.0.0.0:5000"
 
 // MainActivity Class
 class MainActivity : ComponentActivity() {
@@ -76,6 +80,8 @@ fun ChatScreen() {
     val scrollState = rememberScrollState()
     var showDialog by remember { mutableStateOf(false) }
     var connectionAvailable by remember { mutableStateOf(true) }
+    var showSettings by remember { mutableStateOf(false) }
+    var serverUrlInput by remember { mutableStateOf(serverUrl) }
 
     // Check connection once on start
     LaunchedEffect(Unit) {
@@ -91,7 +97,17 @@ fun ChatScreen() {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("CI536 - Laptop ChatBot") }
+                title = { Text("CI536 - Laptop ChatBot") },
+                actions = {
+                    IconButton(onClick = {
+                        showSettings = true
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Settings"
+                        )
+                    }
+                }
             )
         },
         bottomBar = {
@@ -122,6 +138,54 @@ fun ChatScreen() {
                 .padding(8.dp)
                 .verticalScroll(scrollState)
         ) {
+            if (showSettings) {
+                AlertDialog(
+                    onDismissRequest = { showSettings = false },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            showSettings = false
+
+                            // Step 1: Add http:// if missing
+                            var formattedUrl = if (serverUrlInput.startsWith("http://") && serverUrlInput.endsWith(":5000")) {
+                                serverUrlInput
+                            } else {
+                                "http://$serverUrlInput:5000"
+                            }
+
+                            // Update global URL variable
+                            serverUrl = formattedUrl
+                            serverUrlInput = formattedUrl
+
+                            // Test server connection again
+                            webHandler.testConnection { success ->
+                                connectionAvailable = success
+                            }
+
+                        }) {
+                            Text("Save")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showSettings = false }) {
+                            Text("Cancel")
+                        }
+                    },
+                    title = { Text("Settings") },
+                    text = {
+                        Column {
+                            Text("Enter the server URL")
+                            Spacer(modifier = Modifier.height(8.dp))
+                            OutlinedTextField(
+                                value = serverUrlInput,
+                                onValueChange = { serverUrlInput = it },
+                                label = { Text("Server Address") },
+                                singleLine = true
+                            )
+                        }
+                    }
+                )
+            }
+
             // Show connection bubble if the server can't be contacted
             if (!connectionAvailable) {
                 ConnectionBubble()
@@ -168,7 +232,6 @@ fun ConnectionBubble() {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
             .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(12.dp))
             .padding(16.dp)
     ) {
