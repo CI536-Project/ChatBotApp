@@ -12,9 +12,16 @@ import java.util.concurrent.TimeUnit
  */
 class WebHandler {
     private val client = OkHttpClient.Builder()
-        .connectTimeout(60, TimeUnit.SECONDS)
-        .readTimeout(60, TimeUnit.SECONDS)
-        .writeTimeout(60, TimeUnit.SECONDS)
+        .connectTimeout(120, TimeUnit.SECONDS)
+        .readTimeout(120, TimeUnit.SECONDS)
+        .writeTimeout(120, TimeUnit.SECONDS)
+        .build()
+
+    // Duplicated as testing needs lower timeouts
+    private val test_client = OkHttpClient.Builder()
+        .connectTimeout(5, TimeUnit.SECONDS)
+        .readTimeout(5, TimeUnit.SECONDS)
+        .writeTimeout(5, TimeUnit.SECONDS)
         .build()
 
     /**
@@ -127,7 +134,7 @@ class WebHandler {
             .get()
             .build()
 
-        client.newCall(request).enqueue(object : Callback {
+        test_client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 onResult(false)
             }
