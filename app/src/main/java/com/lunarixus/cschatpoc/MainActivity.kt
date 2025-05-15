@@ -221,6 +221,7 @@ fun ChatScreenPreview() {
     }
 }
 
+// Bubble element preview
 @Preview(showBackground = true)
 @Composable
 fun ChatBubblePreview() {
